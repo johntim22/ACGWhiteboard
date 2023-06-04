@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<!---Some features cannot run on papaki server due to security policy but if ran locally are
+fully working--->
+<head>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="css/materialize.min.css" media="screen,projection" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <meta charset="UTF-8">
+    <title>ACG Online Exams</title>
+    <style>
+        #mydiv {
+            position: fixed;
+            z-index: 9;
+            background-color: #f1f1f1;
+            border: 1px solid #d3d3d3;
+            text-align: center;
+        }
+
+        #mydivheader {
+            padding: 10px;
+            cursor: move;
+            z-index: 10;
+            background-color: #34495e;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Draggable DIV -->
+    <div id="mydiv" style="height:min-content; width: min-content;">
+        <!-- Include a header DIV with the same name as the draggable DIV, followed by "header" -->
+        <div id="mydivheader">Drag to move</div>
+        <video id="video" width="200" height="200" autoplay muted></video>
+        <button type="button" onclick="submitexam();">Submit Exam</button>
+    </div>
+    <nav>
+        <div class="nav-wrapper">
+            <a href="#" class="brand-logo">ACG Online Exams</a>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="col s12 m7" id="letsbegin">
+            <div class="card horizontal">
+                <div class="card-stacked">
+                    <div class="card-content">
+                        <p>Welcome to <b>Demo Course</b> final examination</p>
+                        <p>The duration of this exam is <b>12 minutes.</b></p><br>
+                        <p>Your professor has set the following security measures, which you need to enable before starting:</p>
+                        <p>✅ Full screen browser window</p>
+                        <p>✅ Screen recording</p>
+                        <p>✅ Video recording</p>
+                        <p>✅ Audio recording</p>
+                    </div>
+                    <div class="card-action">
+                        <a href="#!" onclick="closeletsbegin(); beginvideo(); startCapture();">Enable and proceed</a>
+                        <a href="http://timotheatos.itweblab.eu/dashboard.php">Cancel</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col s12 m7" id="letsbegin2">
+            <div class="card horizontal">
+                <div class="card-stacked">
+                    <div class="card-content">
+                        <p>If you enabled the security measures you may begin! Countdown will begin as soon as you start!
+                            Good luck!
+                        </p>
+                    </div>
+                    <div class="card-action">
+                        <a href="#!" onclick="closeletsbegin2(); openFullscreen(); closeletsbegin2(); ">Begin Exam</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <iframe id="questions" src="https://global.oup.com/us/companion.websites/9780199329366/ch1/quiz/"
+            style="height: 595px; width: 1112px;"></iframe>
+    </div>
+
+    <script type="text/javascript" src="js/materialize.min.js"></script>
+    <script>
+        document.getElementById("letsbegin2").style.visibility = "hidden";
+        document.getElementById('questions').style.visibility = "hidden";
+    </script>
+    <script>
+        function closeletsbegin() {
+            var elem = document.getElementById("letsbegin");
+            elem.parentNode.removeChild(elem);
+            document.getElementById("letsbegin2").style.visibility = "visible";
+        }
+        function closeletsbegin2() {
+            var elem = document.getElementById("letsbegin2");
+            elem.parentNode.removeChild(elem);
+            document.getElementById("questions").style.visibility = "visible";
+        }
+    </script>
+    <script>
+        async function startCapture(displayMediaOptions) {
+            let captureStream = null;
+
+            try {
+                captureStream = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
+            } catch (err) {
+                console.error("Error: " + err);
+            }
+            return captureStream;
+        }
+    </script>
+    <script>
+        // Make the DIV element draggable:
+        dragElement(document.getElementById("mydiv"));
+
+        function dragElement(elmnt) {
+            var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            if (document.getElementById(elmnt.id + "header")) {
+                // if present, the header is where you move the DIV from:
+                document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
+            } else {
+                // otherwise, move the DIV from anywhere inside the DIV:
+                elmnt.onmousedown = dragMouseDown;
+            }
+
+            function dragMouseDown(e) {
+                e = e || window.event;
+                e.preventDefault();
+                // get the mouse cursor position at startup:
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                // call a function whenever the cursor moves:
+                document.onmousemove = elementDrag;
+            }
+
+            function elementDrag(e) {
+                e = e || window.event;
+                e.preventDefault();
+                // calculate the new cursor position:
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                // set the element's new position:
+                elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+                elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+            }
+
+            function closeDragElement() {
+                // stop moving when mouse button is released:
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+    </script>
+    <script>
+        function beginvideo() {
+            // Grab elements, create settings, etc.
+            var video = document.getElementById('video');
+            // Get access to the camera!
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                // Not adding `{ audio: true }` since we only want video now
+                navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(function (stream) {
+                    //video.src = window.URL.createObjectURL(stream);
+                    video.srcObject = stream;
+                    video.play();
+                });
+            }
+        }
+    </script>
+    <script>
+        /* Get the documentElement (<html>) to display the page in fullscreen */
+        var elem = document.documentElement;
+        /* View in fullscreen */
+        function openFullscreen() {
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE11 */
+                elem.msRequestFullscreen();
+            }
+        }
+    </script>
+    <script>
+        function submitexam() {
+            window.alert("Exam submitted!")
+            window.location.href = "http://timotheatos.itweblab.eu/dashboard.php";
+        }
+    </script>
+</body>
+
+</html>
